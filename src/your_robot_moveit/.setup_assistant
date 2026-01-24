@@ -1,0 +1,25 @@
+moveit_setup_assistant_config:
+  urdf:
+    package: your_robot_gazebo
+    relative_path: urdf/moveit.urdf
+  srdf:
+    relative_path: config/panda_primitive_pretty.srdf
+  package_settings:
+    author_name: todo
+    author_email: todo@qq.com
+    generated_timestamp: 1769175650
+  control_xacro:
+    command:
+      - position
+    state:
+      - position
+      - velocity
+  modified_urdf:
+    xacros:
+      - control_xacro
+  control_xacro:
+    command:
+      - position
+    state:
+      - position
+      - velocity

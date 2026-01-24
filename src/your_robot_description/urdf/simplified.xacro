@@ -1,0 +1,173 @@
+<?xml version="1.0"?>
+<robot name="panda_primitive_pretty" xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+  <!-- ================================================= -->
+  <!-- Materials -->
+  <!-- ================================================= -->
+  <material name="dark_grey"><color rgba="0.25 0.25 0.25 1"/></material>
+  <material name="light_grey"><color rgba="0.7 0.7 0.7 1"/></material>
+  <material name="black"><color rgba="0.05 0.05 0.05 1"/></material>
+
+
+  <!-- ================================================= -->
+  <!-- WORLD -->
+  <!-- ================================================= -->
+  <link name="world"/>
+  <joint name="world_joint" type="fixed">
+    <parent link="world"/>
+    <child link="panda_link0"/>
+    <origin xyz="0 0 0"/>
+  </joint>
+
+
+  <!-- ================================================= -->
+  <!-- BASE -->
+  <!-- ================================================= -->
+  <link name="panda_link0">
+    <visual>
+      <geometry><box size="0.25 0.25 0.12"/></geometry>
+      <origin xyz="0 0 0.06"/>
+      <material name="dark_grey"/>
+    </visual>
+  </link>
+
+
+  <!-- ================================================= -->
+  <!-- =============== MACROS =========================== -->
+  <!-- ================================================= -->
+
+  <!-- Link -->
+  <xacro:macro name="cyl_link" params="name r l m z mat">
+    <link name="${name}">
+      <visual>
+        <geometry><cylinder radius="${r}" length="${l}"/></geometry>
+        <origin xyz="0 0 ${z}"/>
+        <material name="${mat}"/>
+      </visual>
+      <collision>
+        <geometry><cylinder radius="${r}" length="${l}"/></geometry>
+        <origin xyz="0 0 ${z}"/>
+      </collision>
+      <inertial>
+        <mass value="${m}"/>
+        <origin xyz="0 0 ${z}"/>
+        <inertia ixx="0.01" iyy="0.01" izz="0.01"
+                 ixy="0" ixz="0" iyz="0"/>
+      </inertial>
+    </link>
+  </xacro:macro>
+
+
+  <!-- Joint -->
+  <xacro:macro name="rev_joint" params="n p c xyz rpy lo up">
+    <joint name="${n}" type="revolute">
+      <parent link="${p}"/>
+      <child link="${c}"/>
+      <origin xyz="${xyz}" rpy="${rpy}"/>
+      <axis xyz="0 0 1"/>
+      <limit lower="${lo}" upper="${up}" effort="50" velocity="2"/>
+    </joint>
+  </xacro:macro>
+
+
+  <!-- Transmission -->
+  <xacro:macro name="simple_trans" params="j">
+    <transmission name="${j}_trans">
+      <type>transmission_interface/SimpleTransmission</type>
+      <joint name="${j}">
+        <hardwareInterface>hardware_interface/PositionJointInterface</hardwareInterface>
+      </joint>
+      <actuator name="${j}_motor">
+        <hardwareInterface>hardware_interface/PositionJointInterface</hardwareInterface>
+        <mechanicalReduction>1</mechanicalReduction>
+      </actuator>
+    </transmission>
+  </xacro:macro>
+
+
+  <!-- ros2_control joint block -->
+  <xacro:macro name="control_joint" params="j">
+    <joint name="${j}">
+      <command_interface name="position"/>
+      <state_interface name="position"/>
+      <state_interface name="velocity"/>
+    </joint>
+  </xacro:macro>
+
+
+  <!-- ================================================= -->
+  <!-- LINKS -->
+  <!-- ================================================= -->
+
+  <xacro:cyl_link name="panda_link1" r="0.05" l="0.24" m="4" z="0.20" mat="light_grey"/>
+  <xacro:cyl_link name="panda_link2" r="0.045" l="0.22" m="3" z="0.18" mat="light_grey"/>
+  <xacro:cyl_link name="panda_link3" r="0.045" l="0.23" m="2.5" z="0.19" mat="light_grey"/>
+  <xacro:cyl_link name="panda_link4" r="0.04" l="0.16" m="2" z="0.14" mat="light_grey"/>
+  <xacro:cyl_link name="panda_link5" r="0.035" l="0.18" m="1.5" z="0.15" mat="light_grey"/>
+  <xacro:cyl_link name="panda_link6" r="0.03" l="0.12" m="1" z="0.09" mat="light_grey"/>
+  <xacro:cyl_link name="panda_link7" r="0.03" l="0.06" m="0.8" z="0.03" mat="dark_grey"/>
+
+
+  <!-- ================================================= -->
+  <!-- JOINTS -->
+  <!-- ================================================= -->
+
+  <xacro:rev_joint n="panda_joint1" p="panda_link0" c="panda_link1" xyz="0 0 0.12" rpy="0 0 0" lo="-2.9" up="2.9"/>
+  <xacro:rev_joint n="panda_joint2" p="panda_link1" c="panda_link2" xyz="0 0 0.30" rpy="-1.5708 0 0" lo="-1.7" up="1.7"/>
+  <xacro:rev_joint n="panda_joint3" p="panda_link2" c="panda_link3" xyz="0 0 0.25" rpy="1.5708 0 0" lo="-2.9" up="2.9"/>
+  <xacro:rev_joint n="panda_joint4" p="panda_link3" c="panda_link4" xyz="0 0 0.30" rpy="1.5708 0 0" lo="-3.0" up="-0.05"/>
+  <xacro:rev_joint n="panda_joint5" p="panda_link4" c="panda_link5" xyz="0 0 0.20" rpy="-1.5708 0 0" lo="-2.9" up="2.9"/>
+  <xacro:rev_joint n="panda_joint6" p="panda_link5" c="panda_link6" xyz="0 0 0.18" rpy="1.5708 0 0" lo="0.0" up="3.75"/>
+  <xacro:rev_joint n="panda_joint7" p="panda_link6" c="panda_link7" xyz="0 0 0.12" rpy="1.5708 0 0" lo="-2.9" up="2.9"/>
+
+
+  <!-- ================================================= -->
+  <!-- END EFFECTOR -->
+  <!-- ================================================= -->
+
+  <link name="ee_flange">
+    <visual>
+      <geometry><cylinder radius="0.05" length="0.02"/></geometry>
+      <material name="black"/>
+    </visual>
+  </link>
+
+  <joint name="ee_fixed" type="fixed">
+    <parent link="panda_link7"/>
+    <child link="ee_flange"/>
+    <origin xyz="0 0 0.08"/>
+  </joint>
+
+
+  <!-- ================================================= -->
+  <!-- TRANSMISSIONS (auto) -->
+  <!-- ================================================= -->
+
+  <xacro:simple_trans j="panda_joint1"/>
+  <xacro:simple_trans j="panda_joint2"/>
+  <xacro:simple_trans j="panda_joint3"/>
+  <xacro:simple_trans j="panda_joint4"/>
+  <xacro:simple_trans j="panda_joint5"/>
+  <xacro:simple_trans j="panda_joint6"/>
+  <xacro:simple_trans j="panda_joint7"/>
+
+
+  <!-- ================================================= -->
+  <!-- ROS2 CONTROL -->
+  <!-- ================================================= -->
+
+  <ros2_control name="panda_ros2_control" type="system">
+    <hardware>
+      <plugin>gazebo_ros2_control/GazeboSystem</plugin>
+    </hardware>
+
+    <xacro:control_joint j="panda_joint1"/>
+    <xacro:control_joint j="panda_joint2"/>
+    <xacro:control_joint j="panda_joint3"/>
+    <xacro:control_joint j="panda_joint4"/>
+    <xacro:control_joint j="panda_joint5"/>
+    <xacro:control_joint j="panda_joint6"/>
+    <xacro:control_joint j="panda_joint7"/>
+  </ros2_control>
+
+</robot>
