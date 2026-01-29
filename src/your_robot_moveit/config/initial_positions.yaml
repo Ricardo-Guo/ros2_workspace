@@ -1,6 +1,8 @@
 # Default initial positions for panda_primitive_pretty's ros2_control fake system
 
 initial_positions:
+  finger_left_joint: 0
+  finger_right_joint: 0
   panda_joint1: 0
   panda_joint2: 0
   panda_joint3: 0

@@ -1,0 +1,324 @@
+<?xml version="1.0"?>
+<robot name="panda_primitive_pretty">
+
+  <!-- ================= MATERIALS ================= -->
+  <material name="dark_grey">
+    <color rgba="0.25 0.25 0.25 1"/>
+  </material>
+  <material name="light_grey">
+    <color rgba="0.7 0.7 0.7 1"/>
+  </material>
+  <material name="black">
+    <color rgba="0.05 0.05 0.05 1"/>
+  </material>
+
+  <!-- ================= WORLD ================= -->
+  <link name="world"/>
+  <joint name="world_joint" type="fixed">
+    <parent link="world"/>
+    <child link="panda_link0"/>
+    <origin xyz="0 0 0"/>
+  </joint>
+
+  <!-- ================= LINK 0 (BASE) ================= -->
+  <link name="panda_link0">
+    <visual>
+      <geometry>
+        <box size="0.25 0.25 0.12"/>
+      </geometry>
+      <origin xyz="0 0 0.06"/>
+      <material name="dark_grey"/>
+    </visual>
+    <collision>
+      <geometry>
+        <box size="0.25 0.25 0.12"/>
+      </geometry>
+      <origin xyz="0 0 0.06"/>
+    </collision>
+    <inertial>
+      <mass value="3.0"/>
+      <origin xyz="0 0 0.06"/>
+      <inertia ixx="0.02" iyy="0.02" izz="0.02"
+               ixy="0" ixz="0" iyz="0"/>
+    </inertial>
+  </link>
+
+  <!-- ================= LINK 1 ================= -->
+  <link name="panda_link1">
+    <!-- motor part -->
+    <visual>
+      <geometry>
+        <cylinder radius="0.07" length="0.08"/>
+      </geometry>
+      <origin xyz="0 0 0.04"/>
+      <material name="dark_grey"/>
+    </visual>
+    <!-- arm part -->
+    <visual>
+      <geometry>
+        <cylinder radius="0.05" length="0.24"/>
+      </geometry>
+      <origin xyz="0 0 0.20"/>
+      <material name="light_grey"/>
+    </visual>
+    <collision>
+      <geometry>
+        <cylinder radius="0.05" length="0.24"/>
+      </geometry>
+      <origin xyz="0 0 0.20"/>
+    </collision>
+    <inertial>
+      <mass value="4.0"/>
+      <origin xyz="0 0 0.18"/>
+      <inertia ixx="0.2" iyy="0.2" izz="0.02"
+               ixy="0" ixz="0" iyz="0"/>
+    </inertial>
+  </link>
+
+  <joint name="panda_joint1" type="revolute">
+    <parent link="panda_link0"/>
+    <child link="panda_link1"/>
+    <origin xyz="0 0 0.12"/>
+    <axis xyz="0 0 1"/>
+    <limit lower="-2.9" upper="2.9" effort="50" velocity="2"/>
+  </joint>
+
+  <!-- ================= LINK 2 ================= -->
+  <link name="panda_link2">
+    <visual>
+      <geometry>
+        <cylinder radius="0.065" length="0.07"/>
+      </geometry>
+      <origin xyz="0 0 0.035"/>
+      <material name="dark_grey"/>
+    </visual>
+    <visual>
+      <geometry>
+        <cylinder radius="0.045" length="0.22"/>
+      </geometry>
+      <origin xyz="0 0 0.18"/>
+      <material name="light_grey"/>
+    </visual>
+    <collision>
+      <geometry>
+        <cylinder radius="0.045" length="0.22"/>
+      </geometry>
+      <origin xyz="0 0 0.18"/>
+    </collision>
+    <inertial>
+      <mass value="3.0"/>
+      <origin xyz="0 0 0.15"/>
+      <inertia ixx="0.15" iyy="0.15" izz="0.02"
+               ixy="0" ixz="0" iyz="0"/>
+    </inertial>
+  </link>
+
+  <joint name="panda_joint2" type="revolute">
+    <parent link="panda_link1"/>
+    <child link="panda_link2"/>
+    <origin xyz="0 0 0.30" rpy="-1.5708 0 0"/>
+    <axis xyz="0 0 1"/>
+    <limit lower="-1.7" upper="1.7" effort="50" velocity="2"/>
+  </joint>
+
+  <!-- ================= LINK 3 ================= -->
+  <link name="panda_link3">
+    <visual>
+      <geometry>
+        <cylinder radius="0.06" length="0.07"/>
+      </geometry>
+      <origin xyz="0 0 0.035"/>
+      <material name="dark_grey"/>
+    </visual>
+    <visual>
+      <geometry>
+        <cylinder radius="0.045" length="0.23"/>
+      </geometry>
+      <origin xyz="0 0 0.19"/>
+      <material name="light_grey"/>
+    </visual>
+    <collision>
+      <geometry>
+        <cylinder radius="0.045" length="0.23"/>
+      </geometry>
+      <origin xyz="0 0 0.19"/>
+    </collision>
+    <inertial>
+      <mass value="2.5"/>
+      <origin xyz="0 0 0.17"/>
+      <inertia ixx="0.1" iyy="0.1" izz="0.02"
+               ixy="0" ixz="0" iyz="0"/>
+    </inertial>
+  </link>
+
+  <joint name="panda_joint3" type="revolute">
+    <parent link="panda_link2"/>
+    <child link="panda_link3"/>
+    <origin xyz="0 0 0.25" rpy="1.5708 0 0"/>
+    <axis xyz="0 0 1"/>
+    <limit lower="-2.9" upper="2.9" effort="50" velocity="2"/>
+  </joint>
+
+  <!-- ================= LINK 4 ================= -->
+  <link name="panda_link4">
+    <visual>
+      <geometry>
+        <cylinder radius="0.06" length="0.06"/>
+      </geometry>
+      <origin xyz="0 0 0.03"/>
+      <material name="dark_grey"/>
+    </visual>
+    <visual>
+      <geometry>
+        <cylinder radius="0.04" length="0.16"/>
+      </geometry>
+      <origin xyz="0 0 0.14"/>
+      <material name="light_grey"/>
+    </visual>
+    <collision>
+      <geometry>
+        <cylinder radius="0.04" length="0.16"/>
+      </geometry>
+      <origin xyz="0 0 0.14"/>
+    </collision>
+    <inertial>
+      <mass value="2.0"/>
+      <origin xyz="0 0 0.12"/>
+      <inertia ixx="0.08" iyy="0.08" izz="0.015"
+               ixy="0" ixz="0" iyz="0"/>
+    </inertial>
+  </link>
+
+  <joint name="panda_joint4" type="revolute">
+    <parent link="panda_link3"/>
+    <child link="panda_link4"/>
+    <origin xyz="0 0 0.30" rpy="1.5708 0 0"/>
+    <axis xyz="0 0 1"/>
+    <limit lower="-3.0" upper="-0.05" effort="50" velocity="2"/>
+  </joint>
+
+  <!-- ================= LINK 5 (WRIST) ================= -->
+  <link name="panda_link5">
+    <visual>
+      <geometry>
+        <cylinder radius="0.055" length="0.06"/>
+      </geometry>
+      <origin xyz="0 0 0.03"/>
+      <material name="dark_grey"/>
+    </visual>
+    <visual>
+      <geometry>
+        <cylinder radius="0.035" length="0.18"/>
+      </geometry>
+      <origin xyz="0 0 0.15"/>
+      <material name="light_grey"/>
+    </visual>
+    <collision>
+      <geometry>
+        <cylinder radius="0.035" length="0.18"/>
+      </geometry>
+      <origin xyz="0 0 0.15"/>
+    </collision>
+    <inertial>
+      <mass value="1.5"/>
+      <origin xyz="0 0 0.13"/>
+      <inertia ixx="0.05" iyy="0.05" izz="0.01"
+               ixy="0" ixz="0" iyz="0"/>
+    </inertial>
+  </link>
+
+  <joint name="panda_joint5" type="revolute">
+    <parent link="panda_link4"/>
+    <child link="panda_link5"/>
+    <origin xyz="0 0 0.20" rpy="-1.5708 0 0"/>
+    <axis xyz="0 0 1"/>
+    <limit lower="-2.9" upper="2.9" effort="30" velocity="2"/>
+  </joint>
+
+  <!-- ================= LINK 6 ================= -->
+  <link name="panda_link6">
+    <visual>
+      <geometry>
+        <cylinder radius="0.05" length="0.06"/>
+      </geometry>
+      <origin xyz="0 0 0.03"/>
+      <material name="dark_grey"/>
+    </visual>
+    <visual>
+      <geometry>
+        <cylinder radius="0.03" length="0.12"/>
+      </geometry>
+      <origin xyz="0 0 0.09"/>
+      <material name="light_grey"/>
+    </visual>
+    <collision>
+      <geometry>
+        <cylinder radius="0.03" length="0.12"/>
+      </geometry>
+      <origin xyz="0 0 0.09"/>
+    </collision>
+    <inertial>
+      <mass value="1.0"/>
+      <origin xyz="0 0 0.08"/>
+      <inertia ixx="0.03" iyy="0.03" izz="0.008"
+               ixy="0" ixz="0" iyz="0"/>
+    </inertial>
+  </link>
+
+  <joint name="panda_joint6" type="revolute">
+    <parent link="panda_link5"/>
+    <child link="panda_link6"/>
+    <origin xyz="0 0 0.18" rpy="1.5708 0 0"/>
+    <axis xyz="0 0 1"/>
+    <limit lower="0.0" upper="3.75" effort="30" velocity="2"/>
+  </joint>
+
+  <!-- ================= LINK 7 ================= -->
+  <link name="panda_link7">
+    <visual>
+      <geometry>
+        <cylinder radius="0.045" length="0.06"/>
+      </geometry>
+      <origin xyz="0 0 0.03"/>
+      <material name="dark_grey"/>
+    </visual>
+    <collision>
+      <geometry>
+        <cylinder radius="0.03" length="0.06"/>
+      </geometry>
+      <origin xyz="0 0 0.03"/>
+    </collision>
+    <inertial>
+      <mass value="0.8"/>
+      <origin xyz="0 0 0.03"/>
+      <inertia ixx="0.02" iyy="0.02" izz="0.005"
+               ixy="0" ixz="0" iyz="0"/>
+    </inertial>
+  </link>
+
+  <joint name="panda_joint7" type="revolute">
+    <parent link="panda_link6"/>
+    <child link="panda_link7"/>
+    <origin xyz="0 0 0.12" rpy="1.5708 0 0"/>
+    <axis xyz="0 0 1"/>
+    <limit lower="-2.9" upper="2.9" effort="30" velocity="2"/>
+  </joint>
+
+  <!-- ================= END EFFECTOR ================= -->
+  <link name="ee_flange">
+    <visual>
+      <geometry>
+        <cylinder radius="0.05" length="0.02"/>
+      </geometry>
+      <material name="black"/>
+    </visual>
+  </link>
+
+  <joint name="ee_fixed" type="fixed">
+    <parent link="panda_link7"/>
+    <child link="ee_flange"/>
+    <origin xyz="0 0 0.08"/>
+  </joint>
+  
+
+</robot>

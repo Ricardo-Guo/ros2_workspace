@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<robot name="panda_primitive_pretty">
+
+    <!-- ================= GROUP ================= -->
+    <!-- arm组应该只包含7个转动关节 -->
+    <group name="arm">
+        <joint name="panda_joint1"/>
+        <joint name="panda_joint2"/>
+        <joint name="panda_joint3"/>
+        <joint name="panda_joint4"/>
+        <joint name="panda_joint5"/>
+        <joint name="panda_joint6"/>
+        <joint name="panda_joint7"/>
+    </group>
+
+    <!-- ================= END EFFECTOR ================= -->
+    <!-- 正确的方式是定义一个末端执行器 -->
+    <end_effector name="gripper" parent_link="panda_link7" group="arm">
+        <!-- MoveIt会从parent_link开始计算到TCP的变换 -->
+    </end_effector>
+
+    <!-- ================= GROUP STATES ================= -->
+    <group_state name="home" group="arm">
+        <joint name="panda_joint1" value="0"/>
+        <joint name="panda_joint2" value="0"/>
+        <joint name="panda_joint3" value="0"/>
+        <joint name="panda_joint4" value="-1.525"/>
+        <joint name="panda_joint5" value="0"/>
+        <joint name="panda_joint6" value="0"/>
+        <joint name="panda_joint7" value="0"/>
+    </group_state>
+
+    <group_state name="pose_1" group="arm">
+        <joint name="panda_joint1" value="1.6371"/>
+        <joint name="panda_joint2" value="0.9871"/>
+        <joint name="panda_joint3" value="2.8532"/>
+        <joint name="panda_joint4" value="-0.2879"/>
+        <joint name="panda_joint5" value="0"/>
+        <joint name="panda_joint6" value="0"/>
+        <joint name="panda_joint7" value="0"/>
+    </group_state>
+
+
+    <!-- ================= DISABLE COLLISIONS ================= -->
+    <disable_collisions link1="panda_link0" link2="panda_link1" reason="Adjacent"/>
+    <disable_collisions link1="panda_link0" link2="panda_link2" reason="Never"/>
+    <disable_collisions link1="panda_link0" link2="panda_link3" reason="Never"/>
+    <disable_collisions link1="panda_link0" link2="panda_link4" reason="Never"/>
+    <disable_collisions link1="panda_link0" link2="panda_link5" reason="Never"/>
+    <disable_collisions link1="panda_link1" link2="panda_link2" reason="Adjacent"/>
+    <disable_collisions link1="panda_link1" link2="panda_link3" reason="Never"/>
+    <disable_collisions link1="panda_link1" link2="panda_link4" reason="Never"/>
+    <disable_collisions link1="panda_link1" link2="panda_link5" reason="Never"/>
+    <disable_collisions link1="panda_link2" link2="panda_link3" reason="Adjacent"/>
+    <disable_collisions link1="panda_link2" link2="panda_link4" reason="Never"/>
+    <disable_collisions link1="panda_link2" link2="panda_link5" reason="Never"/>
+    <disable_collisions link1="panda_link3" link2="panda_link4" reason="Adjacent"/>
+    <disable_collisions link1="panda_link3" link2="panda_link5" reason="Never"/>
+    <disable_collisions link1="panda_link3" link2="panda_link6" reason="Never"/>
+    <disable_collisions link1="panda_link4" link2="panda_link5" reason="Adjacent"/>
+    <disable_collisions link1="panda_link4" link2="panda_link6" reason="Never"/>
+    <disable_collisions link1="panda_link4" link2="panda_link7" reason="Never"/>
+    <disable_collisions link1="panda_link5" link2="panda_link6" reason="Adjacent"/>
+    <disable_collisions link1="panda_link5" link2="panda_link7" reason="Never"/>
+    <disable_collisions link1="panda_link6" link2="panda_link7" reason="Adjacent"/>
+
+</robot>

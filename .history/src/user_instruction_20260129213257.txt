@@ -1,0 +1,53 @@
+-your_robot_description
+    -config
+        -controllers.yaml:用于rviz中的机械臂控制设定参数
+    -launch
+        -display.launch.py:使用rviz展示机械臂的完整构型
+        -rsp.launch.py:只启动模型的robot_stae_publisher
+    -meshes
+        -collision：原本panda机械臂的碰撞模型，由于cpu一般没有使用
+        -visual:原本panda机械臂的外观模型，由于cpu一般没有使用
+    -urdf
+        -urdf（简化版的panda机械臂）
+        -xacro（简化版的panda机械臂）
+    -CMakeLists.txt
+    -package.xml
+
+-your_robot_description
+    -config
+        -controllers.yaml:配合gazebo_launch.py使用，用于机械臂单点控制器参数
+        -moveit_controllers.yaml:gazebo和moveit配合使用的控制器参数
+    -launch
+        -gazebo_launch.py:只用于启动gazbo加载模型，可以单点控制机械臂的移动
+                          launch后需要手动加载control manager：ros2 run controller_manager spawner joint_state_broadcaster
+                                                            ros2 run controller_manager spawner arm_position_controller
+                          输入的指令格式：ros2 topic pub \
+                                        /arm_position_controller/commands \
+                                        std_msgs/msg/Float64MultiArray \
+                                        "{data: [0.0, -0.5, 0.0, -1.0, 0.0, 1.0, 0.0]}"
+        -gazebo_moveit.launch.py:与moveit配合使用的启动文件，可以使用rviz的GUI来控制机械臂在gazebo中切换姿态
+                                 launch后需要手动加载control manager：ros2 run controller_manager spawner joint_state_broadcaster
+                                                                   ros2 run controller_manager spawner arm_controller
+    -meshes
+    -urdf
+        -gazebo_moveit.urdf:用于启动moveit和gazebo配合使用的urdf
+        -moveit.urdf:用于生成your_robot_moveit的urdf
+        -simplified.urdf:用于gazebo展示模型的urdf
+    -CMakeLists.txt
+    -package.xml
+
+
+-your_robot_moveit
+    -config
+    -launch
+    -meshes
+    -urdf
+    -CMakeLists.txt
+    -package.xml
+
+
+-your_robot_tasks
+    -config
+    -models
+    -resource
+    -test

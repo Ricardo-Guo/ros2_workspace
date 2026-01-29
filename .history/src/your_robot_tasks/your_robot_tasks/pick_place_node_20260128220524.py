@@ -1,0 +1,263 @@
+#!/usr/bin/env python3
+
+import os
+import time
+import rclpy
+
+from rclpy.node import Node
+from rclpy.action import ActionClient
+
+from geometry_msgs.msg import PoseStamped
+from moveit_msgs.action import MoveGroup
+from moveit_msgs.msg import MotionPlanRequest, PlanningScene, CollisionObject
+from shape_msgs.msg import SolidPrimitive
+
+from gazebo_msgs.srv import SpawnEntity
+from ament_index_python.packages import get_package_share_directory
+
+
+# ==========================================================
+# ⭐⭐⭐ 几何尺寸补偿参数
+# ==========================================================
+
+BOX_HEIGHT = 0.10
+BOX_CENTER_Z = 0.05
+BOX_TOP = BOX_CENTER_Z + BOX_HEIGHT / 2.0
+
+FINGER_LENGTH = 0.08
+TOOL0_OFFSET = 0.12
+
+TCP_TO_FINGER_TIP = TOOL0_OFFSET - FINGER_LENGTH
+
+CLEARANCE = 0.002
+
+STOP_Z = BOX_TOP + TCP_TO_FINGER_TIP + CLEARANCE
+APPROACH_Z = 0.10
+
+
+# ==========================================================
+class MoveOnlyNode(Node):
+
+    # ======================================================
+    def __init__(self):
+        super().__init__("move_only_node")
+
+        # arm 规划
+        self.move_client = ActionClient(self, MoveGroup, "/move_action")
+
+        # ⭐ gripper 规划（新增）
+        self.gripper_client = ActionClient(self, MoveGroup, "/move_action")
+
+        self.scene_pub = self.create_publisher(
+            PlanningScene, "/planning_scene", 10
+        )
+
+        self.spawn_cli = self.create_client(SpawnEntity, "/spawn_entity")
+
+
+    # ======================================================
+    # ⭐⭐⭐ 主流程
+    # ======================================================
+    def run_once(self):
+
+        self.move_client.wait_for_server()
+        self.gripper_client.wait_for_server()
+
+        self.add_box()
+        self.spawn_box()
+
+        time.sleep(1.0)
+
+        x = 0.40
+        y = 0.0
+
+        self.get_logger().info(f"STOP_Z = {STOP_Z:.3f}")
+
+        # ① 打开夹爪
+        self.get_logger().info("🟢 打开夹爪")
+        self.control_gripper(0.04)
+
+        # ② 上方接近
+        self.get_logger().info("⬆️ approach")
+        self.move_to_pose(x, y, APPROACH_Z)
+
+        # ③ 下降
+        self.get_logger().info("⬇️ descend")
+        self.move_to_pose(x, y, STOP_Z)
+
+        # ④ 闭合
+        self.get_logger().info("🔴 闭合夹爪")
+        self.control_gripper(0.0)
+
+        self.get_logger().info("✅ 已夹住方块（未移动）")
+
+
+    # ======================================================
+    # ⭐⭐⭐ 机械臂移动
+    # ======================================================
+    def move_to_pose(self, x, y, z):
+
+        goal = MoveGroup.Goal()
+        req = MotionPlanRequest()
+
+        req.group_name = "arm"
+
+        req.allowed_planning_time = 2.0
+        req.num_planning_attempts = 3
+        req.max_velocity_scaling_factor = 0.3
+        req.max_acceleration_scaling_factor = 0.3
+
+        pose = PoseStamped()
+        pose.header.frame_id = "world"
+
+        pose.pose.position.x = x
+        pose.pose.position.y = y
+        pose.pose.position.z = z
+
+        pose.pose.orientation.x = 1.0
+        pose.pose.orientation.w = 0.0
+
+        from moveit_msgs.msg import (
+            Constraints,
+            PositionConstraint,
+            OrientationConstraint,
+            BoundingVolume
+        )
+
+        c = Constraints()
+
+        # 位置约束
+        pc = PositionConstraint()
+        pc.header = pose.header
+        pc.link_name = "tool0"
+
+        sphere = SolidPrimitive()
+        sphere.type = SolidPrimitive.SPHERE
+        sphere.dimensions = [0.001]
+
+        bv = BoundingVolume()
+        bv.primitives.append(sphere)
+        bv.primitive_poses.append(pose.pose)
+
+        pc.constraint_region = bv
+        pc.weight = 1.0
+
+        # 姿态约束
+        oc = OrientationConstraint()
+        oc.header = pose.header
+        oc.link_name = "tool0"
+        oc.orientation = pose.pose.orientation
+        oc.absolute_x_axis_tolerance = 0.01
+        oc.absolute_y_axis_tolerance = 0.01
+        oc.absolute_z_axis_tolerance = 0.01
+
+        c.position_constraints.append(pc)
+        c.orientation_constraints.append(oc)
+
+        req.goal_constraints.append(c)
+        goal.request = req
+
+        future = self.move_client.send_goal_async(goal)
+        rclpy.spin_until_future_complete(self, future)
+
+        handle = future.result()
+        result_future = handle.get_result_async()
+        rclpy.spin_until_future_complete(self, result_future)
+
+
+    # ======================================================
+    # ⭐⭐⭐ 夹爪控制（匹配你SRDF）
+    # ======================================================
+    def control_gripper(self, width):
+
+        goal = MoveGroup.Goal()
+        req = MotionPlanRequest()
+
+        req.group_name = "gripper"
+
+        from moveit_msgs.msg import Constraints, JointConstraint
+
+        c = Constraints()
+
+        # ⭐ 你的真实 joint 名
+        for joint_name in ["finger_left_joint", "finger_right_joint"]:
+
+            jc = JointConstraint()
+            jc.joint_name = joint_name
+            jc.position = width / 2.0
+            jc.tolerance_above = 0.001
+            jc.tolerance_below = 0.001
+            jc.weight = 1.0
+
+            c.joint_constraints.append(jc)
+
+        req.goal_constraints.append(c)
+        goal.request = req
+
+        future = self.gripper_client.send_goal_async(goal)
+        rclpy.spin_until_future_complete(self, future)
+
+        handle = future.result()
+        result_future = handle.get_result_async()
+        rclpy.spin_until_future_complete(self, result_future)
+
+
+    # ======================================================
+    def add_box(self):
+
+        co = CollisionObject()
+        co.id = "box"
+        co.header.frame_id = "world"
+
+        primitive = SolidPrimitive()
+        primitive.type = SolidPrimitive.BOX
+        primitive.dimensions = [0.04, 0.04, BOX_HEIGHT]
+
+        pose = PoseStamped().pose
+        pose.position.x = 0.4
+        pose.position.z = BOX_CENTER_Z
+        pose.orientation.w = 1.0
+
+        co.primitives.append(primitive)
+        co.primitive_poses.append(pose)
+        co.operation = CollisionObject.ADD
+
+        scene = PlanningScene()
+        scene.world.collision_objects.append(co)
+        scene.is_diff = True
+
+        self.scene_pub.publish(scene)
+
+
+    # ======================================================
+    def spawn_box(self):
+
+        while not self.spawn_cli.wait_for_service(timeout_sec=1.0):
+            pass
+
+        pkg = get_package_share_directory("your_robot_tasks")
+        sdf_path = os.path.join(pkg, "models", "box", "model.sdf")
+
+        with open(sdf_path) as f:
+            sdf = f.read()
+
+        req = SpawnEntity.Request()
+        req.name = "box"
+        req.xml = sdf
+        req.initial_pose.position.x = 0.4
+        req.initial_pose.position.z = BOX_CENTER_Z
+
+        future = self.spawn_cli.call_async(req)
+        rclpy.spin_until_future_complete(self, future)
+
+
+# ==========================================================
+def main():
+    rclpy.init()
+    node = MoveOnlyNode()
+    node.run_once()
+    rclpy.shutdown()
+
+
+if __name__ == "__main__":
+    main()
